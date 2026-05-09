@@ -1,0 +1,295 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Word Embeddings and SOMs</title>
+    <meta
+      name="description"
+      content="A recruiter-friendly readout of a CS 443 Skip-gram word embeddings and self-organizing maps project."
+    />
+    <style>
+      :root {
+        color-scheme: light;
+        --ink: #182033;
+        --muted: #5d6677;
+        --line: #dce2ea;
+        --paper: #f7faf7;
+        --panel: #ffffff;
+        --accent: #476b2d;
+        --accent-2: #8b4a2f;
+        --accent-3: #2d5f73;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        color: var(--ink);
+        background: var(--paper);
+        line-height: 1.55;
+      }
+
+      a {
+        color: inherit;
+      }
+
+      .hero {
+        min-height: 74vh;
+        display: grid;
+        align-items: end;
+        background:
+          linear-gradient(180deg, rgba(14, 22, 20, 0.12), rgba(14, 22, 20, 0.74)),
+          url("https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=2400&q=85")
+            center / cover;
+        color: white;
+      }
+
+      .wrap {
+        width: min(1120px, calc(100% - 40px));
+        margin: 0 auto;
+      }
+
+      .hero-copy {
+        padding: 84px 0 52px;
+        max-width: 860px;
+      }
+
+      .eyebrow {
+        margin: 0 0 14px;
+        font-size: 0.8rem;
+        font-weight: 800;
+        letter-spacing: 0;
+        text-transform: uppercase;
+      }
+
+      h1 {
+        margin: 0;
+        font-size: clamp(2.3rem, 7vw, 5.5rem);
+        line-height: 0.96;
+        letter-spacing: 0;
+      }
+
+      .hero p {
+        max-width: 760px;
+        margin: 22px 0 0;
+        font-size: clamp(1rem, 2vw, 1.25rem);
+      }
+
+      .actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-top: 28px;
+      }
+
+      .actions a {
+        min-height: 44px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid rgba(255, 255, 255, 0.55);
+        padding: 10px 14px;
+        background: rgba(255, 255, 255, 0.14);
+        text-decoration: none;
+        font-weight: 700;
+      }
+
+      section {
+        padding: 56px 0;
+      }
+
+      h2 {
+        margin: 0 0 18px;
+        font-size: clamp(1.7rem, 3vw, 2.6rem);
+        letter-spacing: 0;
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 18px;
+      }
+
+      .metric,
+      .note {
+        border: 1px solid var(--line);
+        background: var(--panel);
+        padding: 20px;
+      }
+
+      .metric strong {
+        display: block;
+        font-size: 2rem;
+        color: var(--accent);
+      }
+
+      .metric span,
+      .note p {
+        color: var(--muted);
+      }
+
+      .flow {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 12px;
+      }
+
+      .step {
+        border-top: 4px solid var(--accent-3);
+        background: var(--panel);
+        padding: 18px;
+      }
+
+      .step b {
+        display: block;
+        margin-bottom: 8px;
+      }
+
+      .neighbors {
+        display: grid;
+        gap: 10px;
+        margin-top: 24px;
+      }
+
+      .neighbor {
+        display: grid;
+        grid-template-columns: 110px 1fr 74px;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .track {
+        height: 14px;
+        background: #e2e8f0;
+      }
+
+      .fill {
+        height: 100%;
+        background: var(--accent-2);
+      }
+
+      .word-map {
+        min-height: 320px;
+        position: relative;
+        border: 1px solid var(--line);
+        background:
+          linear-gradient(90deg, rgba(45, 95, 115, 0.12) 1px, transparent 1px),
+          linear-gradient(0deg, rgba(45, 95, 115, 0.12) 1px, transparent 1px),
+          #fff;
+        background-size: 40px 40px;
+        overflow: hidden;
+      }
+
+      .word-map span {
+        position: absolute;
+        padding: 4px 8px;
+        background: white;
+        border: 1px solid var(--line);
+        font-weight: 700;
+      }
+
+      footer {
+        border-top: 1px solid var(--line);
+        padding: 32px 0;
+        color: var(--muted);
+      }
+
+      @media (max-width: 780px) {
+        .grid,
+        .flow {
+          grid-template-columns: 1fr;
+        }
+
+        .neighbor {
+          grid-template-columns: 86px 1fr 64px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="hero">
+      <div class="wrap hero-copy">
+        <p class="eyebrow">CS 443 machine learning project</p>
+        <h1>Word Embeddings and Self-Organizing Maps</h1>
+        <p>
+          A Skip-gram embedding model paired with a self-organizing map, turning movie-review text into vector
+          neighborhoods and visual word clusters.
+        </p>
+        <div class="actions">
+          <a href="https://github.com/ymbawa26/cs443-project-3-word-embeddings-som">View GitHub</a>
+          <a href="https://github.com/ymbawa26/cs443-project-3-word-embeddings-som/blob/main/word_embeddings.ipynb">Read Notebook</a>
+          <a href="https://colab.research.google.com/github/ymbawa26/cs443-project-3-word-embeddings-som/blob/main/word_embeddings.ipynb">Open in Colab</a>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <section>
+        <div class="wrap">
+          <h2>At A Glance</h2>
+          <div class="grid">
+            <div class="metric"><strong>141</strong><span>Saved word vectors used in the notebook visualization.</span></div>
+            <div class="metric"><strong>SOM</strong><span>Custom best-matching unit search, neighborhood update, and U-matrix tools.</span></div>
+            <div class="metric"><strong>NLP</strong><span>Text preprocessing, Skip-gram training, similarity search, and word-cloud analysis.</span></div>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <div class="wrap">
+          <h2>Pipeline</h2>
+          <div class="flow">
+            <div class="step"><b>1. Tokenize text</b>Clean IMDb-style reviews and map words to integer ids.</div>
+            <div class="step"><b>2. Train Skip-gram</b>Predict context words from target words to learn embedding vectors.</div>
+            <div class="step"><b>3. Search neighbors</b>Use cosine similarity to find words that live nearby in embedding space.</div>
+            <div class="step"><b>4. Map structure</b>Train a SOM to place high-dimensional word vectors onto a 2D lattice.</div>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <div class="wrap">
+          <h2>Similarity Readout</h2>
+          <p>Notebook sample for the query word `movie` after loading the saved embedding vectors.</p>
+          <div class="neighbors" aria-label="Most similar words to movie">
+            <div class="neighbor"><span>loved</span><div class="track"><div class="fill" style="width: 91%"></div></div><span>0.9146</span></div>
+            <div class="neighbor"><span>cast</span><div class="track"><div class="fill" style="width: 90%"></div></div><span>0.9041</span></div>
+            <div class="neighbor"><span>humor</span><div class="track"><div class="fill" style="width: 90%"></div></div><span>0.9035</span></div>
+            <div class="neighbor"><span>emotion</span><div class="track"><div class="fill" style="width: 90%"></div></div><span>0.9028</span></div>
+            <div class="neighbor"><span>script</span><div class="track"><div class="fill" style="width: 90%"></div></div><span>0.8965</span></div>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <div class="wrap">
+          <h2>What The SOM Adds</h2>
+          <div class="word-map" aria-label="Illustrative SOM word map">
+            <span style="left: 12%; top: 18%">movie</span>
+            <span style="left: 27%; top: 25%">cast</span>
+            <span style="left: 44%; top: 16%">script</span>
+            <span style="left: 62%; top: 31%">mystery</span>
+            <span style="left: 18%; top: 57%">emotion</span>
+            <span style="left: 36%; top: 69%">heart</span>
+            <span style="left: 68%; top: 63%">humor</span>
+            <span style="left: 78%; top: 45%">pacing</span>
+          </div>
+          <div class="note">
+            <p>
+              The SOM is useful because it makes embedding neighborhoods inspectable. Similar words can be highlighted
+              on a learned 2D grid, which turns a high-dimensional vector model into something easier to reason about.
+            </p>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <div class="wrap">Built by Yazan Bawaqna for CS 443 Bio-inspired Machine Learning.</div>
+    </footer>
+  </body>
+</html>
