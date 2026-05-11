@@ -5,7 +5,7 @@
 [![Python](https://img.shields.io/badge/Python-3.10%2B-3776AB?logo=python&logoColor=white)](https://www.python.org/)
 [![TensorFlow](https://img.shields.io/badge/TensorFlow-Skip--gram-FF6F00?logo=tensorflow&logoColor=white)](https://www.tensorflow.org/)
 
-Recruiter-friendly readout of a CS 443 Bio-inspired Machine Learning project. The core idea: learn word vectors from movie-review text, then use a self-organizing map to make the learned structure visible.
+CS 443 Bio-inspired Machine Learning project. The core idea: learn word vectors from movie-review text, then use a self-organizing map to make the learned structure visible.
 
 ## What This Shows
 
