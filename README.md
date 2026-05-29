@@ -38,15 +38,3 @@ CS 443 Bio-inspired Machine Learning project. The core idea: learn word vectors 
 - `skipgram.py`, `skipgram_layers.py`, `som.py`, and `text_dataset_word.py` contain the main implementations.
 - `data/imdb_train.csv` is a small included dataset for reproducible notebook runs.
 
-## Run Locally
-
-```bash
-python -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
-jupyter notebook
-```
-
-## Validation
-
-The notebooks and helper files were previously repaired and validated locally so the assignment cells run with the expected outputs.
